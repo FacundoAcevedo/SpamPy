@@ -172,6 +172,9 @@ def filtrarSpam():
     presentarListaid("Id del spam:",idsFiltrados)
     borrar(idsFiltrados, forzado=False)
 
+def borrarTodo():
+    borrar("BorrarTodo")
+
 def borrar(ids, forzado = False):
     """Borra los mails segun el id recibido"""
     if DEBUG: print sys._getframe().f_code.co_name
