@@ -13,8 +13,9 @@ Limpia la cola de mailq segun se lo requiera
 global msg_opcionInvalida, logger, DEBUG, MAILQ, RUTA_MAILS
 #CONFIGRACION
 MAILQ="/usr/bin/mailq"
-RUTA_MAILS="/var/spool/mqueue/"
-DEBUG = False
+#RUTA_MAILS="/var/spool/mqueue/"
+RUTA_MAILS="/var/spool/postfix/active/"
+DEBUG = True
 
 
 #http://docs.python.org/2/howto/argparse.html#id1
@@ -102,15 +103,19 @@ def procesarSalidaMailq(texto):
     #Corto por renglones
     renglones = texto.split("\n")
 
-    #Busco algo asi -> r9BDJJj2006941     7076 Fri Oct 11 10:19 <id@mail.com.xx>
+    #Busco algo asi -> 3hp5vw46BTzKpsC*      5964 Wed Sep  3 10:43:40 mzlocutora@hotmail.com
     #Recorro los renglones y parseo
     for renglon in renglones:
+        listaComponentes = renglon.split()
         #Compruebo que haya remitente/detinatario
-        if (renglon.find("<") != -1) and (renglon.find(">") != -1) and  (renglon.find("(Deferred:") == -1):
-            listaComponentes = renglon.split()
+        #if (renglon.find("<") != -1) and (renglon.find(">") != -1) and  (renglon.find("(Deferred:") == -1):
+        if ( len(listaComponentes) == 7 and validarEmail(listaComponentes[-1]) ):
+            #Algunas versiones de mailq le agregan un asterisco al id
+            idCorreo = listaComponentes[0].replace("*","")
+            print idCorreo
+            print listaComponentes
             #Verifico que sea la linea que tiene el id del mail
             if len(listaComponentes) == 7:
-                idCorreo = listaComponentes[0]
                 salida[idCorreo] = [quitarMenorMayor(listaComponentes[6])]
 
             else:
