@@ -51,7 +51,7 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        DEBUGE = True
+        DEBUG = True
 
     if args.correo:
         if DEBUG: print "Filtrando por correo"
@@ -146,10 +146,12 @@ def filtrar(diccionario, email="", spam = False):
         return []
 
 def guardarInforme(listadoId, mensaje):
+    "Guarda mensaje en el log"
     logger.info(mensaje)
     logger.info(repr(listadoId))
 
 def filtrarPorEmail(mail):
+    "Filtra los correos del mailq por remitente"
     if DEBUG: print sys._getframe().f_code.co_name
     colaSinProcesar = obtenerColaMailq()
     colaProcesada = procesarSalidaMailq(colaSinProcesar)
@@ -164,6 +166,7 @@ def filtrarPorEmail(mail):
     borrar(idsFiltrados, forzado=False)
 
 def filtrarSpam():
+    "Filtra los correos del mailq si son spam"
     if DEBUG: print sys._getframe().f_code.co_name
     colaSinProcesar = obtenerColaMailq()
     colaProcesada = procesarSalidaMailq(colaSinProcesar)
@@ -178,12 +181,12 @@ def filtrarSpam():
     borrar(idsFiltrados, forzado=False)
 
 def borrarTodo():
+    "Wrapper para borrar todo el spam"
     borrar("BorrarTodo")
 
 def borrar(ids, forzado = False):
     """Borra los mails segun el id recibido"""
     if DEBUG: print sys._getframe().f_code.co_name
-    archivosEnDirectorio = []
 
     if ids == "BorrarTodo":
         for archivo in os.listdir(RUTA_MAILS):
@@ -209,22 +212,28 @@ def borrar(ids, forzado = False):
             salir()
 
 
-    for archivo in os.listdir(RUTA_MAILS):
-        for _id in ids:
-            if archivo.find(_id) != -1:
-                #dentro del nombre del archivo esta el id que queremos borrar
-                ruta = os.path.join(RUTA_MAILS, archivo)
-                try:
-                    if os.path.isfile(ruta):
-                        logger.info("Borrando: "+str(ruta))
-                        os.unlink(ruta)
+    for _id in ids:
+        cmd = "postsuper -d %s" % _id
+        p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        print p.stdout.read()
 
-                except Exception ,e:
-                    print e
-                    logger.info("Error: "+ str(e))
+    #for archivo in os.listdir(RUTA_MAILS):
+        #for _id in ids:
+            #if archivo.find(_id) != -1:
+                ##dentro del nombre del archivo esta el id que queremos borrar
+                #ruta = os.path.join(RUTA_MAILS, archivo)
+                #try:
+                    #if os.path.isfile(ruta):
+                        #logger.info("Borrando: "+str(ruta))
+                        #os.unlink(ruta)
+
+                #except Exception ,e:
+                    #print e
+                    #logger.info("Error: "+ str(e))
 
 
 def presentarListaid(titulo,lista):
+    """Muestra por pantalla la lista de correos filtrados"""
     lista_= []
     m=4 # cantidad maxima de columnas
     a=0 #auxiliar
